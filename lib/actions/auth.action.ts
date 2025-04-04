@@ -18,6 +18,10 @@ export const signUp = async (params: SignUpParams) => {
       email,
       name,
     })
+    return {
+      success: true,
+      message: "Successfuly created account",
+    }
   } catch (error: any) {
     console.error("Error signing up", error)
     if (error.code === "auth/email-already-exists")
@@ -45,6 +49,11 @@ export const signIn = async (params: SignInParams) => {
   const { email, idToken } = params
   try {
     const userRecord = await auth.getUserByEmail(email)
+    if (!userRecord) return { success: false, message: "User does not exist" }
+
+    await setSessionCookie(idToken)
+
+    return { success: true, message: "Successfully signed in" }
   } catch (error: any) {
     console.error(error)
     return {
