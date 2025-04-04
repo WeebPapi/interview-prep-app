@@ -1,5 +1,5 @@
 "use client"
-import React from "react"
+import React, { useEffect } from "react"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -11,6 +11,9 @@ import Link from "next/link"
 import { toast } from "sonner"
 import CustomFormField from "./FormField"
 import { useRouter } from "next/navigation"
+import { signUp } from "@/lib/actions/auth.action"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth } from "@/firebase/client"
 
 const authFormSchema = (type: FormType) => {
   return z.object({
@@ -37,9 +40,25 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
   })
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       if (type === "sign-up") {
+        const { name, email, password } = values
+        const userCredentials = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        )
+        const result = await signUp({
+          uid: userCredentials.user.uid,
+          name: name as string,
+          email,
+          password,
+        })
+        if (!result?.success) {
+          toast.error(result?.message)
+          return
+        }
         toast.success("Account created successfully. Please sign in.")
         router.push("/sign-in")
       } else if (type === "sign-in") {
