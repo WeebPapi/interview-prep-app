@@ -17,6 +17,7 @@ import {
 } from "firebase/auth"
 import { auth } from "@/firebase/client"
 import { Loader } from "rsuite"
+import "rsuite/dist/rsuite-no-reset-rtl.min.css"
 
 const authFormSchema = (type: FormType) => {
   return z.object({
@@ -43,46 +44,34 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
     },
   })
 
-  const signInWithLoading = async ({ email, idToken }: SignInParams) => {
-    setIsLoading(true)
-    await signIn({ email, idToken })
-    setIsLoading(false)
-  }
-  const signUpWithLoading = async ({
-    email,
-    uid,
-    name,
-    password,
-  }: SignUpParams) => {
-    setIsLoading(true)
-    const result = await signUp({ email, uid, name, password })
-    setIsLoading(false)
-    return result
-  }
-
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       if (type === "sign-up") {
+        setIsLoading(true)
         const { name, email, password } = values
         const userCredentials = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         )
-        const result = await signUpWithLoading({
+        const result = await signUp({
           uid: userCredentials.user.uid,
           name: name as string,
           email,
           password,
         })
+        setIsLoading(false)
+
         if (!result?.success) {
+          setIsLoading(false)
           toast.error(result?.message)
           return
         }
         toast.success("Account created successfully. Please sign in.")
         router.push("/sign-in")
       } else if (type === "sign-in") {
+        setIsLoading(true)
         const { email, password } = values
         const userCredentials = signInWithEmailAndPassword(
           auth,
@@ -92,15 +81,18 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
         const idToken = await (await userCredentials).user.getIdToken()
 
         if (!idToken) {
+          setIsLoading(false)
           toast.error("Sign in failed")
           return
         }
 
-        signInWithLoading({ email, idToken })
+        await signIn({ email, idToken })
+        setIsLoading(false)
         toast.success("Signed in successfully")
         router.push("/")
       }
     } catch (error) {
+      setIsLoading(false)
       console.error(error)
       toast.error("There was an issue")
     }
@@ -120,7 +112,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 mt-4 w-full form"
+            className="space-y-6 mt-4 w-full form "
           >
             {!isSignIn && (
               <CustomFormField
@@ -143,7 +135,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ type }) => {
               placeholder="Your Password"
               type="password"
             />
-            {isLoading && <Loader />}
+            <div className={`relative ${isLoading ? "h-[30px]" : ""}`}>
+              {isLoading && <Loader size="md" center />}
+            </div>
             <Button type="submit" className="btn">
               {isSignIn ? "Sign In" : "Create an Account"}
             </Button>
