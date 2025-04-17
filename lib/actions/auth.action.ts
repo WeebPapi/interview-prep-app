@@ -86,3 +86,42 @@ export const isAuthenticated = async () => {
   const user = await getCurrentUser()
   return !!user
 }
+
+export const getInterviewByUserId = async (userId: string) => {
+  try {
+    const interviews = await db
+      .collection("interviews")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
+      .get()
+
+    console.log("User: ", userId, interviews.docs)
+    return interviews.docs.map((document) => ({
+      id: document.id,
+      ...document.data(),
+    })) as Interview[]
+  } catch (error) {
+    console.error(error)
+  }
+}
+export const getLatestInterviews = async (
+  params: GetLatestInterviewsParams
+) => {
+  try {
+    const { userId, limit = 20 } = params
+    const interviews = await db
+      .collection("interviews")
+      .orderBy("createdAt", "desc")
+      .where("finalized", "==", true)
+      .where("userId", "!=", userId)
+      .limit(limit)
+      .get()
+
+    return interviews.docs.map((document) => ({
+      id: document.id,
+      ...document.data(),
+    })) as Interview[]
+  } catch (error) {
+    console.error(error)
+  }
+}
