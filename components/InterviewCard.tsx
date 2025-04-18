@@ -11,7 +11,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
   techstack,
   type,
   createdAt,
-  interviewId,
+  id,
   userId,
 }) => {
   const feedback = null as Feedback | null
@@ -58,11 +58,7 @@ const InterviewCard: React.FC<InterviewCardProps> = ({
           <DisplayTechIcons techstack={techstack} />
           <Button className="btn-primary">
             <Link
-              href={
-                feedback
-                  ? `/interview/${interviewId}/feedback`
-                  : `/interview/${interviewId}`
-              }
+              href={feedback ? `/interview/${id}/feedback` : `/interview/${id}`}
             >
               {feedback ? "Check Feedback" : "Take Interview"}
             </Link>
