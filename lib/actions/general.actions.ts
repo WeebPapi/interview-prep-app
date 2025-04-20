@@ -1,3 +1,4 @@
+"use server"
 import { feedbackSchema } from "@/constants"
 import { db } from "@/firebase/admin"
 import { google } from "@ai-sdk/google"
@@ -98,6 +99,19 @@ export const createFeedback = async (params: CreateFeedbackParams) => {
     return { success: true, feedbackId: feedback.id }
   } catch (error) {
     console.error("Error saving feedback", error)
+    return { success: false }
+  }
+}
+
+export const getFeedbackById: (
+  id: string
+) => Promise<Feedback | { success: boolean }> = async (id) => {
+  try {
+    const feedback = await db.collection("feedback").doc(id).get()
+    const data = feedback.data() as Feedback
+    return { success: true, ...data }
+  } catch (error) {
+    console.error(error)
     return { success: false }
   }
 }

@@ -64,14 +64,13 @@ const Agent: React.FC<AgentProps> = ({
   }, [])
 
   const handleGenerateFeedback = async (msgs: SavedMessage[]) => {
-    console.log("Generate feedback here")
     const { success, feedbackId } = await createFeedback({
       interviewId: interviewId!,
       userId: userId!,
       transcript: messages,
     })
     if (success && feedbackId) {
-      router.push(`/interview/${interviewId}/feedback`)
+      router.push(`/interview/${interviewId}/feedback?id=${feedbackId}`)
     } else {
       console.log("Error saving feedback")
       router.push("/")
@@ -135,7 +134,7 @@ const Agent: React.FC<AgentProps> = ({
         <div className="card-border">
           <div className="card-content">
             <Image
-              src={"/user-avatar.png"}
+              src={"/user-avatar.jpg"}
               alt="user avatar"
               width={540}
               height={540}
