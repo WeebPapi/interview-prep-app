@@ -5,7 +5,12 @@ import { getRandomInterviewCover } from "@/lib/utils"
 import { Button } from "./ui/button"
 import Link from "next/link"
 import DisplayTechIcons from "./DisplayTechIcons"
-import { getFeedbackById } from "@/lib/actions/general.actions"
+import {
+  getFeedbackByInterviewId,
+  getInterviewById,
+  getInterviewByUserId,
+} from "@/lib/actions/general.actions"
+import { getCurrentUser } from "@/lib/actions/auth.action"
 
 const InterviewCard: React.FC<InterviewCardProps> = async ({
   role,
@@ -15,7 +20,10 @@ const InterviewCard: React.FC<InterviewCardProps> = async ({
   id,
   userId,
 }) => {
-  const feedback = (await getFeedbackById(id!)) as Feedback
+  const user = await getCurrentUser()
+  const feedback = await getFeedbackByInterviewId(id!)
+  const interview = await getInterviewById(id!)
+  const finished = feedback && interview?.userId === user?.id
   const normalizedType = /max/gi.test(type) ? "Mix" : type
   const formattedDate = dayjs(
     feedback?.createdAt || createdAt || Date.now()
@@ -47,21 +55,26 @@ const InterviewCard: React.FC<InterviewCardProps> = async ({
             </div>
             <div className="flex gap-2 items-center">
               <Image src={"/star.svg"} alt="star" width={22} height={22} />
-              <p>{feedback?.totalScore || "---"}/100</p>
+              <p>{finished ? feedback?.totalScore : "---"}/100</p>
             </div>
           </div>
           <p className="line-clamp-2 mt-5">
-            {feedback?.finalAssessment ||
-              "You haven't taken the interview yet, take it now?"}
+            {finished
+              ? feedback?.finalAssessment
+              : "You haven't taken the interview yet, take it now?"}
           </p>
         </div>
         <div className="flex justify-between">
           <DisplayTechIcons techstack={techstack} />
           <Button className="btn-primary">
             <Link
-              href={feedback ? `/interview/${id}/feedback` : `/interview/${id}`}
+              href={
+                finished
+                  ? `/interview/${id}/feedback?id=${feedback.id}`
+                  : `/interview/${id}`
+              }
             >
-              {feedback ? "Check Feedback" : "Take Interview"}
+              {finished ? "Check Feedback" : "Take Interview"}
             </Link>
           </Button>
         </div>

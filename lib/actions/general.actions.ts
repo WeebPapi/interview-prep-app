@@ -103,15 +103,31 @@ export const createFeedback = async (params: CreateFeedbackParams) => {
   }
 }
 
-export const getFeedbackById: (
-  id: string
-) => Promise<Feedback | { success: boolean }> = async (id) => {
+export const getFeedbackById: (id: string) => Promise<Feedback | null> = async (
+  id
+) => {
   try {
     const feedback = await db.collection("feedback").doc(id).get()
     const data = feedback.data() as Feedback
-    return { success: true, ...data }
+    return data ? { ...data, id: feedback?.id } : null
   } catch (error) {
     console.error(error)
-    return { success: false }
+    return null
+  }
+}
+export const getFeedbackByInterviewId: (
+  id: string
+) => Promise<Feedback | null> = async (interviewId) => {
+  try {
+    const feedback = await db
+      .collection("feedback")
+      .where("interviewId", "==", interviewId)
+      .get()
+    const data = feedback.docs[0]?.data() as Feedback
+
+    return data ? { ...data, id: feedback.docs[0]?.id } : null
+  } catch (error) {
+    console.error(error)
+    return null
   }
 }

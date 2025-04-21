@@ -65,7 +65,7 @@ const FeedbackComponent = ({ feedbackId }: { feedbackId: string }) => {
       </div>
       <div className="w-[60%] flex flex-col my-4">
         <h2>Breakdown of Assessment:</h2>
-        {feedback?.categoryScores.map((cat, index) => (
+        {feedback?.categoryScores?.map((cat, index) => (
           <div className="py-4" key={index + cat.name}>
             <p className="text-[18px] font-[700] py-2">
               {index + 1 + ". "}
@@ -73,6 +73,28 @@ const FeedbackComponent = ({ feedbackId }: { feedbackId: string }) => {
               {`(${cat.score}/100)`}
             </p>
             <p>{cat.comment}</p>
+          </div>
+        ))}
+      </div>
+      <div className="w-[60%] flex flex-col my-4">
+        <h2>Strengths:</h2>
+        {feedback?.strengths?.map((strength, index) => (
+          <div className="" key={index + strength}>
+            <p className="text-[18px] font-[700] py-2">
+              {index + 1 + ". "}
+              {strength + " "}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="w-[60%] flex flex-col my-4">
+        <h2>Areas for Improvement:</h2>
+        {feedback?.areasForImprovement?.map((area, index) => (
+          <div className="" key={index + area}>
+            <p className="text-[18px] font-[700] py-2">
+              {index + 1 + ". "}
+              {area + " "}
+            </p>
           </div>
         ))}
       </div>
